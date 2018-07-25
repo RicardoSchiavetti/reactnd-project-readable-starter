@@ -15,6 +15,7 @@ class Post extends Component {
 
     componentDidMount = () => {        
         this.props.postId && this._getPostById();
+        this.props.isEditing && this.onEditPost();
     }
 
     _getAllCategories = () => {        
@@ -26,7 +27,7 @@ class Post extends Component {
     _getPostById = () => {        
         api.getPostById(this.props.postId)
             .then((post) => {
-                this.setState({post})
+                post.id &&  this.setState({post})
         })
     }
 
@@ -88,6 +89,19 @@ class Post extends Component {
         
     }
 
+    onDeletePost = () => {
+        api.deletePostById(this.state.post.id).then(post =>{
+            this.props.excludePost(post);            
+        });
+        this.props.history.push('/');
+    }
+
+    onVotePost = (postId, vote) => {
+        api.votePost(postId, vote).then(post =>{
+            this.props.changeVote(post)
+        })
+    }
+
     render() {    
         
         const spanButtonNewStyle = {
@@ -108,9 +122,35 @@ class Post extends Component {
                                     <div className="mdl-card__supporting-text">
                                         {!isEditing &&
                                             <div>
-                                                <h3>{post.title}</h3> 
-                                                <h6>Category: {post.category}  <br/><p/>  Comments: {post.commentCount}  <br/><p/>  Date: {moment(post.timestamp).format('LL')}  <br/><p/>  Votes: {post.voteScore} <br/><p/> Author: {post.author}</h6>
-                                                <p>{post.body}</p>
+                                                <div className="mdl-grid">
+                                                    <div className="mdl-cell mdl-cell--10-col">
+                                                        <h4>{post.title}</h4>
+                                                    </div>
+                                                    
+                                                    <div className="mdl-cell mdl-cell--2-col mdl-grid">
+                                                        <div className ="mdl-cell mdl-cell--6-col">
+                                                            <button className="mdl-button mdl-js-button mdl-button--icon" onClick={() => this.onVotePost(post.id, true)}>
+                                                                <i className="material-icons">thumb_up_alt</i>
+                                                            </button>
+                                                        </div>
+                                                        <div className ="mdl-cell mdl-cell--6-col">
+                                                            <button className="mdl-button mdl-js-button mdl-button--icon" onClick={() => this.onVotePost(post.id, false)}>
+                                                                <i className="material-icons">thumb_down_alt</i>
+                                                            </button>
+                                                        </div>                                    
+                                                    </div>
+                                                </div>                                 
+                                        
+                                                <div className="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
+                                                    <h5>Category: {post.category} <br/><p/>   Comments: {post.commentCount}  <br/><p/>  Date: {moment(post.timestamp).format('LL')}  <br/><p/>  Votes: {post.voteScore} <br/><p/> Author: {post.author}</h5>
+                                                    {post.body}
+                                                </div>   
+
+                                                <div className="mdl-card__actions">
+                                                    <button className="mdl-button" 
+                                                            onClick={() => this.onDeletePost()}> Delete </button>
+                                                </div>
+
                                                 <div className="mdl-card__actions">
                                                     <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" 
                                                             onClick={() => this.onEditPost()}> Edit </button>
@@ -130,11 +170,11 @@ class Post extends Component {
 
 
                                                 <div className="mdl-textfield mdl-js-textfield">
-                                                    Author: <input defaultValue={this.state.post && this.state.post.author } onChange={this.onAuthorChange} className="mdl-textfield__input" type="text" id="sample1"/>
+                                                    Author: <input defaultValue={this.state.post && this.state.post.author } onChange={this.onAuthorChange} className="mdl-textfield__input" type="text" id="edAuthor"/>
                                                 </div>
 
                                                 <div className="mdl-textfield mdl-js-textfield">
-                                                    Title: <input defaultValue={this.state.post && this.state.post.title } onChange={this.onTitleChange} className="mdl-textfield__input" type="text" id="sample1"/>
+                                                    Title: <input defaultValue={this.state.post && this.state.post.title } onChange={this.onTitleChange} className="mdl-textfield__input" type="text" id="edTitle"/>
                                                 </div>
 
                                                 <div className="mdl-textfield mdl-js-textfield">
@@ -150,6 +190,10 @@ class Post extends Component {
                                 </div>                                                    
                             </section>
                         </form>
+                    } { !post &&
+                        <div>
+                            <h3>404 - Post not found </h3>
+                        </div>
                     }
                    
                     {post && !isEditing &&    
@@ -180,6 +224,8 @@ class Post extends Component {
 function mapDispatchToProps(dispatch) {
     return {
       updatePost: (data) => dispatch(actions.modifyPost(data)),
+      excludePost:(data) => dispatch(actions.removePost(data)),
+      changeVote:(data) => dispatch(actions.votePost(data)),
     }
   }
 

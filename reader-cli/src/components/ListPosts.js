@@ -144,6 +144,11 @@ class ListPosts extends Component {
                                 <div className="mdl-card__actions">
                                         <Link className="mdl-button" key="toPost" to={`/${post.category}/${post.id}`}> Details </Link>
                                 </div>
+
+                                <div className="mdl-card__actions">
+                                <Link className="mdl-button" key="toPost" to={{pathname:`/${post.category}/${post.id}`, isEditing: true }}> Edit </Link>
+                                </div>
+
                                 <div className="mdl-card__actions">
                                     <button className="mdl-button" onClick={() => this.onDeletePost(post.id)}> Delete </button>
                                 </div>

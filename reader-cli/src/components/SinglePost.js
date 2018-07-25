@@ -8,7 +8,10 @@ const SinglePost = props => {
         <div className="mdl-layout__container has-scrolling-header">
           <div className="mdl-layout mdl-js-layout mdl-layout--fixed-header has-tabs is-upgraded">
             <Header/>
-            <Post postId={props.match.params.postId}/>
+            <Post postId={props.match.params.postId} 
+                  isEditing={props.location.isEditing ? props.location.isEditing:false}
+                  history={props.history}
+                  />
           </div>      
         </div>        
     )
